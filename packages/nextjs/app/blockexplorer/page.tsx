@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { PaginationButton, SearchBar, TransactionsTable } from "./_components";
 import type { NextPage } from "next";
 import { hardhat } from "viem/chains";
+import { TransactionTableSkeleton } from "~~/components/Loading";
 import { useFetchBlocks } from "~~/hooks/scaffold-eth";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 import { notification } from "~~/utils/scaffold-eth";
@@ -13,6 +14,7 @@ const BlockExplorer: NextPage = () => {
   const { targetNetwork } = useTargetNetwork();
   const [isLocalNetwork, setIsLocalNetwork] = useState(true);
   const [hasError, setHasError] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   useEffect(() => {
     if (targetNetwork.id !== hardhat.id) {
@@ -25,6 +27,13 @@ const BlockExplorer: NextPage = () => {
       setHasError(true);
     }
   }, [targetNetwork.id, error]);
+
+  // Handle initial loading state
+  useEffect(() => {
+    if (blocks.length > 0 || hasError || !isLocalNetwork) {
+      setIsInitialLoading(false);
+    }
+  }, [blocks.length, hasError, isLocalNetwork]);
 
   useEffect(() => {
     if (!isLocalNetwork) {
@@ -74,8 +83,21 @@ const BlockExplorer: NextPage = () => {
   return (
     <div className="container mx-auto my-10">
       <SearchBar />
-      <TransactionsTable blocks={blocks} transactionReceipts={transactionReceipts} />
-      <PaginationButton currentPage={currentPage} totalItems={Number(totalBlocks)} setCurrentPage={setCurrentPage} />
+
+      {isInitialLoading ? (
+        <div className="flex justify-center px-4 md:px-0">
+          <TransactionTableSkeleton />
+        </div>
+      ) : (
+        <>
+          <TransactionsTable blocks={blocks} transactionReceipts={transactionReceipts} />
+          <PaginationButton
+            currentPage={currentPage}
+            totalItems={Number(totalBlocks)}
+            setCurrentPage={setCurrentPage}
+          />
+        </>
+      )}
     </div>
   );
 };
