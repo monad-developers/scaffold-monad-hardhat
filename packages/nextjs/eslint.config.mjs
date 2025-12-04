@@ -20,6 +20,8 @@ export default defineConfig([
     rules: {
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/ban-ts-comment": "off",
+      // Allow triple-slash references in auto-generated next-env.d.ts
+      "@typescript-eslint/triple-slash-reference": "off",
 
       "prettier/prettier": [
         "warn",
